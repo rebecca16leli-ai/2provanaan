@@ -1,7 +1,5 @@
 // ============ NAAN Semijoias — Landing (JS puro) ============
-
 document.addEventListener('DOMContentLoaded', () => {
-
   /* ---- Header muda de estilo ao rolar ---- */
   const header = document.getElementById('siteHeader');
   const onScroll = () => {
@@ -54,16 +52,58 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---- Formulário de cadastro ---- */
   const form = document.getElementById('cadastroForm');
   const successBox = document.getElementById('formSuccess');
+  const URL_API = 'https://painel.naansemijoias.com.br/api/salvar_cadastro.php';
+
   if (form) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!form.checkValidity()) {
         form.reportValidity();
         return;
       }
-      // Aqui entra a integração real de envio (endpoint, planilha, CRM, etc.)
-      form.style.display = 'none';
-      successBox.style.display = 'block';
+
+      const botao = form.querySelector('button[type="submit"]');
+      const autorizaCheckbox = form.querySelector('.consent input[type="checkbox"]');
+
+      const dados = {
+        nome_completo: form.nome.value,
+        cpf: form.cpf.value,
+        idade: form.idade.value,
+        email: form.email.value,
+        whatsapp: form.whats.value,
+        cidade_estado: form.cidade.value,
+        instagram: form.ig.value,
+        endereco_completo: form.endereco.value,
+        modalidade_venda: form.modo.value,
+        ja_trabalha_semijoias: form.exp.value,
+        experiencia_revenda: form.revenda.value,
+        conhece_consultora: form.conhece.value,
+        nome_consultora: form['consultora-nome'].value,
+        informacoes_adicionais: form.info.value,
+        autorizou_contato: autorizaCheckbox && autorizaCheckbox.checked ? 1 : 0,
+      };
+
+      if (botao) botao.disabled = true;
+
+      try {
+        const resposta = await fetch(URL_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dados),
+        });
+        const resultado = await resposta.json();
+
+        if (resultado.sucesso) {
+          form.style.display = 'none';
+          successBox.style.display = 'block';
+        } else {
+          alert(resultado.erro || 'Não foi possível enviar. Tente novamente.');
+          if (botao) botao.disabled = false;
+        }
+      } catch (erro) {
+        alert('Erro de conexão. Verifique sua internet e tente novamente.');
+        if (botao) botao.disabled = false;
+      }
     });
   }
 
@@ -72,5 +112,4 @@ document.addEventListener('DOMContentLoaded', () => {
   if (footYear) {
     footYear.textContent = `© ${new Date().getFullYear()} NAAN Semijoias. Todos os direitos reservados.`;
   }
-
 });
