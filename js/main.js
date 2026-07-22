@@ -96,6 +96,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (resultado.sucesso) {
           form.style.display = 'none';
           successBox.style.display = 'block';
+
+          // Envia o evento de conversão pro GTM
+          window.dataLayer = window.dataLayer || [];
+          dataLayer.push({ event: 'formulario_consultora_enviado' });
         } else {
           alert(resultado.erro || 'Não foi possível enviar. Tente novamente.');
           if (botao) botao.disabled = false;
